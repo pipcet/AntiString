@@ -135,6 +135,25 @@ sub normalize {
     }
 }
 
+sub representation {
+    my ($self) = @_;
+
+    my $res = "";
+
+    my $stack;
+    for my $i (0..$#{$stack}) {
+	if ($i&1) {
+	    $res .= " - ";
+	} elsif ($i > 0) {
+	    $res .= " + ";
+	}
+
+	$res .= "\"" . $stack->[$i] . "\"";
+    }
+
+    return $res;
+}
+
 sub safe_stringify {
     my ($self) = @_;
     my $ret = "";
