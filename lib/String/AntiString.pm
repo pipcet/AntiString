@@ -104,11 +104,21 @@ sub normalize {
 	for my $i (0..$#{$newstack}-1) {
 	    next if $newstack->[$i] eq "";
 
-	    while ($newstack->[$i] ne "" and
-		   substr($newstack->[$i], -1) eq substr($newstack->[$i+1], -1)) {
-		$newstack->[$i] =~ s/.$//msg;
-		$newstack->[$i+1] =~ s/.$//msg;
-		$didsomething = 1;
+
+	    if (($i&1) == 0) {
+		while ($newstack->[$i] ne "" and
+		       substr($newstack->[$i], -1) eq substr($newstack->[$i+1], -1)) {
+		    $newstack->[$i] =~ s/.$//msg;
+		    $newstack->[$i+1] =~ s/.$//msg;
+		    $didsomething = 1;
+		}
+	    } else {
+		while ($newstack->[$i] ne "" and
+		       substr($newstack->[$i], 0, 1) eq substr($newstack->[$i+1], 0, 1)) {
+		    $newstack->[$i] =~ s/^.//msg;
+		    $newstack->[$i+1] =~ s/^.//msg;
+		    $didsomething = 1;
+		}
 	    }
 	}
 
