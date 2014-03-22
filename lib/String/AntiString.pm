@@ -9,7 +9,29 @@ use overload
     'neg' => \&negate,
     '-' => \&minus,
     '""' => \&safe_stringify,
-    '.' => \&concat;
+    '.' => \&concat,
+    'eq' => \&eq;
+
+sub eq {
+    my ($self, $other, $swap) = @_;
+
+    if ($swap) {
+	$self = upgrade($self);
+    } else {
+	$other = upgrade($other);
+    }
+
+    my $stack_a = $self->{stack};
+    my $stack_b = $other->{stack};
+
+    return 0 if $#{$stack_a} != $#{$stack_b};
+
+    for my $i (0 .. $#{$stack_a}) {
+	return 0 if $stack_a->[$i] ne $stack_b->[$i];
+    }
+
+    return 1;
+}
 
 sub upgrade {
     my ($self) = @_;
