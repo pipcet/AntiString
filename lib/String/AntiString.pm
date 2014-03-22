@@ -88,10 +88,72 @@ sub append {
 
     push @{$self->{stack}}, @{$arg->{stack}};
 
-    $self->normalize;
+    $self->slow_normalize;
 
     return $self;
 }
+
+sub letters {
+    my ($self) = @_;
+    my $stack = $self->{stack};
+    my @res;
+    for(my $i=0; $i<=$#{$stack}; $i++) {
+	my $str = $stack->[$i];
+	if ($i&1) {
+	    for (my $j=length($str)-1; $j>=0;$j--) {
+		push @res, [substr($str, $j, 1), -1];
+	    }
+	} else {
+	    for (my $j=0; $j<length($str);$j++) {
+		push @res, [substr($str, $j, 1), 1];
+	    }
+	}
+    }
+
+    return @res;
+}
+
+sub slow_normalize {
+    my ($self) = @_;
+    my @letters = $self->letters;
+
+    my $didsomething = 1;
+  loop:
+    while($didsomething) {
+	$didsomething = 0;
+	for my $i (0..$#letters-1) {
+	    if ($letters[$i][0] eq $letters[$i+1][0] and
+		$letters[$i][1] != $letters[$i+1][1]) {
+		splice(@letters, $i, 2);
+		$didsomething = 1;
+		next loop;
+	    }
+	}
+    }
+
+    my @stack;
+    my $i = 0;
+    while($i <= $#letters) {
+	my $j = $i;
+
+	while($j <= $#letters and $letters[$j][1] == 1) {
+	    $j++;
+	}
+	push @stack, join("", map { $letters[$_][0] } ($i..$j-1));
+	$i = $j;
+
+	while($j <= $#letters and $letters[$j][1] == -1) {
+	    $j++;
+	}
+	push @stack, join("", reverse map { $letters[$_][0] } ($i..$j-1));
+	$i = $j;
+    }
+
+    $self->{stack} = \@stack;
+
+    return $self;
+}
+
 
 sub normalize {
     my ($self) = @_;
@@ -133,8 +195,25 @@ sub normalize {
 	    }
 	}
 
+	for (my $i=0; $i<=$#{$newstack}; $i++) {
+	    if ($newstack->[$i] eq "") {
+		my $prefi = ($i>0) ? $i-1 : 0;
+		my $posti = ($i<$#{$newstack}) ? $i+1 : $i;
+
+		my $pref = ($i>0) ? $newstack->[$i-1] : "";
+		my $post = ($i<$#{$newstack}) ? $newstack->[$i+1] : "";
+
+		splice(@$newstack, $prefi, $posti-$prefi, $pref.$post);
+		push @$newstack, "" if (($prefi-$posti)&1);
+		$i = $prefi+1;
+		$didsomething = 1 if $posti>$prefi+1;
+	    }
+	}
+
 	$self->{stack} = $newstack;
     }
+
+    return $self;
 }
 
 sub representation {
@@ -160,7 +239,7 @@ sub safe_stringify {
     my ($self) = @_;
     my $ret = "";
 
-    $self->normalize;
+    $self->slow_normalize;
     my $stack = $self->{stack};
 
     for (my $i=0; $i<=$#{$stack}; $i++) {
