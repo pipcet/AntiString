@@ -2,6 +2,8 @@ use strict;
 use warnings;
 package String::AntiString;
 
+use String::Escape qw(quote);
+
 # ABSTRACT: extend strings to include formal inverses
 
 use overload
@@ -140,7 +142,7 @@ sub representation {
 
     my $res = "";
 
-    my $stack;
+    my $stack = $self->{stack};
     for my $i (0..$#{$stack}) {
 	if ($i&1) {
 	    $res .= " - ";
@@ -148,7 +150,7 @@ sub representation {
 	    $res .= " + ";
 	}
 
-	$res .= "\"" . $stack->[$i] . "\"";
+	$res .= quote($stack->[$i]);
     }
 
     return $res;
