@@ -1,3 +1,6 @@
 use String::AntiString;
+use feature qw(say);
 
-print "hi" - "i";
+say "hello world" - " world" + " earth";
+say "hi" - "i";
+say -"hi" + "hi, there";
