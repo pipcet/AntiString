@@ -235,6 +235,24 @@ sub representation {
     return $res;
 }
 
+sub signed_length {
+    my ($self) = @_;
+    my $res = 0;
+
+    my $stack = $self->{stack};
+    for my $i (0..$#{$stack}) {
+	if ($i&1) {
+	    $res -= length($stack->[$i]);
+	} elsif ($i > 0) {
+	    $res += length($stack->[$i]);
+	}
+
+	$res .= quote($stack->[$i]);
+    }
+
+    return $res;
+}
+
 sub safe_stringify {
     my ($self) = @_;
     my $ret = "";
